@@ -1,0 +1,1 @@
+-e git://github.com/tyoungNIO/pycomm.git@5f1e89fb4cf728de24b04d937873275dd4d44f12#egg=pycomm
