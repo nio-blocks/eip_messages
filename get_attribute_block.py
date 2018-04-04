@@ -1,5 +1,5 @@
 from pycomm.cip.cip_generic import Driver
-from nio import Block
+from nio import Block, Signal
 from nio.properties import Property, IntProperty, StringProperty, \
                            VersionProperty
 
@@ -14,20 +14,25 @@ class GetAttribute(Block):
 
     def __init__(self):
         super().__init__()
-        self.conn = Driver()
+        self.cnxn = Driver()
 
     def configure(self, context):
         super().configure(context)
-        self.conn.open(self.host())
+        self.cnxn.open(self.host())
 
     def process_signals(self, signals):
-        path = [self.class_id(), self.instance_num()]
-        if self.attribute_num() != None:
-            path.append(int(self.attribute_num()))
+        outgoing_signals = []
         for signal in signals:
-            self.conn.get_attribute_single(*path)
-        self.notify_signals(signals)
+            path = [self.class_id(signal), self.instance_num(signal)]
+            if self.attribute_num(signal) != None:
+                path.append(int(self.attribute_num(signal)))
+            new_signal = Signal()
+            new_signal.host = self.host()
+            new_signal.path = path
+            new_signal.value = self.cnxn.get_attribute_single(*path)
+            outgoing_signals.append(new_signal)
+        self.notify_signals(outgoing_signals)
 
     def stop(self):
         super().stop()
-        self.conn.close()
+        self.cnxn.close()
