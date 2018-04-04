@@ -1,1 +1,1 @@
--e git://github.com/tyoungNIO/pycomm.git@154ed27027a7f5cb29b60c2efe549805d2558415#egg=pycomm
+-e git://github.com/tyoungNIO/pycomm.git@a77bfbac186e316dca2d8b1368fb0b7e031bf6a5#egg=pycomm
