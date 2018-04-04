@@ -1,7 +1,12 @@
 {
-  "namespace/BlockName": {
+  "nio/GetAttribute": {
     "language": "Python",
-    "version": "0.0.1",
-    "reference": "github.com/<organization>/<repo>@v0.0.1"
+    "url": "git://github.com/nio-blocks/eip_messages.git",
+    "version": "0.1.0"
+  },
+  "nio/SetAttribute": {
+    "language": "Python",
+    "url": "git://github.com/nio-blocks/eip_messages.git",
+    "version": "0.1.0"
   }
 }
