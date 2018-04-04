@@ -78,3 +78,16 @@ class TestGetAttribute(NIOBlockTestCase):
         self.assertEqual(len(self.notified_signals[DEFAULT_TERMINAL]), 1)
         for signal_list in self.notified_signals[DEFAULT_TERMINAL]:
             self.assertEqual(len(signal_list), 3)
+
+    @patch(GetAttribute.__module__ + '.Driver')
+    def test_signal_enrichment(self, mock_driver):
+        """Incoming signals are enriched new data"""
+        drvr = mock_driver.return_value
+        drvr.get_attribute_single.return_value = 42
+        blk = GetAttribute()
+        self.configure_block(blk, {'enrich': {'exclude_existing': False}})
+        blk.start()
+        blk.process_signals([Signal({'foo': 'bar'})])
+        blk.stop()
+        self.assert_last_signal_notified(Signal(
+            {'foo': 'bar', 'host': 'localhost', 'path': [1, 1], 'value': 42}))
