@@ -24,6 +24,20 @@ class TestGetAttribute(NIOBlockTestCase):
             Signal({'host': 'localhost', 'path': [1, 1], 'value': 42}))
 
     @patch(GetAttribute.__module__ + '.Driver')
+    def test_failure_to_get(self, mock_driver):
+        """One of two requests fail"""
+        drvr = mock_driver.return_value
+        drvr.get_attribute_single.side_effect = [False, True]
+        drvr.get_status.return_value = (1, 'bad things')
+        blk = GetAttribute()
+        self.configure_block(blk, {})
+        blk.start()
+        blk.process_signals([Signal()] * 2)
+        self.assertEqual(drvr.get_attribute_single.call_count, 2)
+        blk.stop()
+        self.assert_num_signals_notified(1)
+
+    @patch(GetAttribute.__module__ + '.Driver')
     def test_configured_block(self, mock_driver):
         """Get an attribute from the specified path and host"""
         drvr = mock_driver.return_value
