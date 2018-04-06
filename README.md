@@ -5,7 +5,7 @@ Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device o
 Properties
 ----------
 - **host**: The IP address or hostname of the target device.
-- **class_id**: The CIP class ID, in decimal.
+- **class_id**: The CIP class ID to request.
 - **instance_num**: The instance number of the CIP class.
 - **attribute_num**: (optional) The attribute number to request.
 - **enrich**: Signal Enrichment
@@ -37,7 +37,7 @@ Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device o
 Properties
 ----------
 - **host**: The IP address or hostname of the target device.
-- **class_id**: The CIP class ID, in decimal.
+- **class_id**: The CIP class ID to request.
 - **instance_num**: The instance number of the CIP class.
 - **attribute_num**: (optional) The attribute number to set.
 - **value**: Raw bytes to set as the attribute value.
