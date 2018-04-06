@@ -8,40 +8,11 @@ from ..set_attribute_block import SetAttribute
 class TestSetAttribute(NIOBlockTestCase):
 
     @patch(SetAttribute.__module__ + '.Driver')
-    def test_default_block(self, mock_driver):
-        """Set an attribute using the default values"""
-        drvr = mock_driver.return_value
-        drvr.set_attribute_single.return_value = True
-        blk = SetAttribute()
-        self.configure_block(blk, {})
-        blk.start()
-        drvr.open.assert_called_once_with('localhost')
-        blk.process_signals([Signal()])
-        drvr.set_attribute_single.assert_called_once_with(b'\x00\x00', 1, 1)
-        blk.stop()
-        drvr.close.assert_called_once_with()
-        self.assert_last_signal_notified(Signal(
-            {'host': 'localhost', 'path': [1, 1], 'value': b'\x00\x00'}))
-
-    @patch(SetAttribute.__module__ + '.Driver')
-    def test_failure_to_set(self, mock_driver):
-        """One of two requests fail"""
-        drvr = mock_driver.return_value
-        drvr.set_attribute_single.side_effect = [False, True]
-        drvr.get_status.return_value = (1, 'bad things')
-        blk = SetAttribute()
-        self.configure_block(blk, {})
-        blk.start()
-        blk.process_signals([Signal()] * 2)
-        self.assertEqual(drvr.set_attribute_single.call_count, 2)
-        blk.stop()
-        self.assert_num_signals_notified(1)
-
-    @patch(SetAttribute.__module__ + '.Driver')
     def test_block_expressions(self, mock_driver):
         """Set an attribute value from the specified path, host, and value"""
         drvr = mock_driver.return_value
         config = {
+            'host': 'dummyhost',
             'class_id': '{{ $class_id }}',
             'instance_num': '{{ $instance_num }}',
             'attribute_num': '{{ $attribute_num }}',
@@ -49,16 +20,19 @@ class TestSetAttribute(NIOBlockTestCase):
         blk = SetAttribute()
         self.configure_block(blk, config)
         blk.start()
+        drvr.open.assert_called_once_with('dummyhost')
         incoming_signal = Signal({
             'class_id': 8,
             'instance_num': 6,
             'attribute_num': 7,
             'value': bytes([5, 3, 0, 9])})
         blk.process_signals([incoming_signal])
+        drvr.set_attribute_single.assert_called_once_with(
+            bytes([5, 3, 0, 9]), 8, 6, 7)
         blk.stop()
         drvr.close.assert_called_once_with()
         self.assert_last_signal_notified(Signal({
-            'host': 'localhost',
+            'host': 'dummyhost',
             'path': [8, 6, 7],
             'value': bytes([5, 3, 0, 9])}))
 
@@ -88,3 +62,17 @@ class TestSetAttribute(NIOBlockTestCase):
             'host': 'localhost',
             'path': [1, 1],
             'value': b'\x00\x00'}))
+
+    @patch(SetAttribute.__module__ + '.Driver')
+    def test_failure_to_set(self, mock_driver):
+        """One of two requests fail"""
+        drvr = mock_driver.return_value
+        drvr.set_attribute_single.side_effect = [False, True]
+        drvr.get_status.return_value = (1, 'bad things')
+        blk = SetAttribute()
+        self.configure_block(blk, {})
+        blk.start()
+        blk.process_signals([Signal()] * 2)
+        self.assertEqual(drvr.set_attribute_single.call_count, 2)
+        blk.stop()
+        self.assert_num_signals_notified(1)
