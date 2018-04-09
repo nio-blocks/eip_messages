@@ -5,14 +5,13 @@ from nio.properties import Property, IntProperty, StringProperty, \
                            VersionProperty
 
 
-class SetAttribute(EnrichSignals, Block):
+class CIPGetAttribute(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     host = StringProperty(title='Hostname', default='localhost')
     class_id = IntProperty(title='Class ID', default=1)
     instance_num = IntProperty(title='Instance', default=1)
     attribute_num = Property(title='Attribute', default=None, allow_none=True)
-    value = Property(title='Value(s) to Write', default='{{ bytes([0, 0]) }}')
 
     def __init__(self):
         super().__init__()
@@ -32,8 +31,8 @@ class SetAttribute(EnrichSignals, Block):
             path = [self.class_id(signal), self.instance_num(signal)]
             if self.attribute_num(signal) != None:
                 path.append(int(self.attribute_num(signal)))
-            value = self.value(signal)
-            if self.cnxn.set_attribute_single(value, *path):
+            value = self.cnxn.get_attribute_single(*path)
+            if value:
                 new_signal_dict = {}
                 new_signal_dict['host'] = self.host()
                 new_signal_dict['path'] = path
@@ -42,9 +41,8 @@ class SetAttribute(EnrichSignals, Block):
                 outgoing_signals.append(new_signal)
             else:
                 self.logger.error(
-                    'set_attribute_single failed: {}\n'
-                    'host: {}, path: {}, value: {}'
-                    .format(self.cnxn.get_status(), self.host(), path, value))
+                    'get_attribute_single failed: {}\nhost: {}, path: {}'
+                    .format(self.cnxn.get_status(), self.host(), path))
         self.notify_signals(outgoing_signals)
 
     def stop(self):
