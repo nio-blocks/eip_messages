@@ -17,7 +17,7 @@ class CIPDriver(Base):
             path.extend([0x30, attr])
         message_request = [
             bytes([0x0E]),  # get attribute single service
-            bytes([len(path)]),  # the Request Path Size length in word
+            bytes([len(path) // 2]),  # the Request Path Size length in word
             bytes(path),  # the request path
         ]
         packet = build_common_packet_format(
@@ -44,7 +44,7 @@ class CIPDriver(Base):
             path.extend([0x30, attr])
         message_request = [
             bytes([0x10]),  # set attribute single service
-            bytes([len(path)]),  # the Request Path Size length in word
+            bytes([len(path) // 2]),  # the Request Path Size length in word
             bytes(path),  # the request path
             bytes(data),  # data to write, two bytes per word
         ]
