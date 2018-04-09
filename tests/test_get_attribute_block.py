@@ -7,7 +7,7 @@ from ..get_attribute_block import GetAttribute
 
 class TestGetAttribute(NIOBlockTestCase):
 
-    @patch(GetAttribute.__module__ + '.Driver')
+    @patch(GetAttribute.__module__ + '.CIPDriver')
     def test_block_expressions(self, mock_driver):
         """Get an attribute from the specified path and host"""
         drvr = mock_driver.return_value
@@ -30,7 +30,7 @@ class TestGetAttribute(NIOBlockTestCase):
         self.assert_last_signal_notified(Signal(
             {'host': 'dummyhost', 'path': [8, 6, 7], 'value': 5309}))
 
-    @patch(GetAttribute.__module__ + '.Driver')
+    @patch(GetAttribute.__module__ + '.CIPDriver')
     def test_signal_lists(self, mock_driver):
         """Outgoing signal lists have the same length as incoming"""
         blk = GetAttribute()
@@ -41,7 +41,7 @@ class TestGetAttribute(NIOBlockTestCase):
         self.assertEqual(len(self.notified_signals[DEFAULT_TERMINAL]), 1)
         self.assertEqual(len(self.notified_signals[DEFAULT_TERMINAL][0]), 3)
 
-    @patch(GetAttribute.__module__ + '.Driver')
+    @patch(GetAttribute.__module__ + '.CIPDriver')
     def test_signal_enrichment(self, mock_driver):
         """Incoming signals are enriched new data"""
         drvr = mock_driver.return_value
@@ -54,7 +54,7 @@ class TestGetAttribute(NIOBlockTestCase):
         self.assert_last_signal_notified(Signal(
             {'foo': 'bar', 'host': 'localhost', 'path': [1, 1], 'value': 42}))
 
-    @patch(GetAttribute.__module__ + '.Driver')
+    @patch(GetAttribute.__module__ + '.CIPDriver')
     def test_failure_to_get(self, mock_driver):
         """One of two requests fail"""
         drvr = mock_driver.return_value

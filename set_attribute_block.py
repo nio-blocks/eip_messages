@@ -1,4 +1,4 @@
-from pycomm.cip.cip_generic import Driver
+from .cip_driver import CIPDriver
 from nio import Block
 from nio.block.mixins.enrich.enrich_signals import EnrichSignals
 from nio.properties import Property, IntProperty, StringProperty, \
@@ -20,9 +20,9 @@ class SetAttribute(EnrichSignals, Block):
 
     def configure(self, context):
         super().configure(context)
-        self.cnxn = Driver()
+        self.cnxn = CIPDriver()
         self.cnxn.open(self.host())
-        # each instance of Driver can open connection to only 1 host
+        # each instance of CIPDriver can open connection to only 1 host
         # subsequent calls to open() are quietly ignored, and close()
         # does not take any args, so one host per block instance for now
 
@@ -48,5 +48,5 @@ class SetAttribute(EnrichSignals, Block):
         self.notify_signals(outgoing_signals)
 
     def stop(self):
-        super().stop()
         self.cnxn.close()
+        super().stop()
