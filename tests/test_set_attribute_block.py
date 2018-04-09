@@ -7,7 +7,7 @@ from ..set_attribute_block import SetAttribute
 
 class TestSetAttribute(NIOBlockTestCase):
 
-    @patch(SetAttribute.__module__ + '.Driver')
+    @patch(SetAttribute.__module__ + '.CIPDriver')
     def test_block_expressions(self, mock_driver):
         """Set an attribute value from the specified path, host, and value"""
         drvr = mock_driver.return_value
@@ -36,7 +36,7 @@ class TestSetAttribute(NIOBlockTestCase):
             'path': [8, 6, 7],
             'value': bytes([5, 3, 0, 9])}))
 
-    @patch(SetAttribute.__module__ + '.Driver')
+    @patch(SetAttribute.__module__ + '.CIPDriver')
     def test_signal_lists(self, mock_driver):
         """Outgoing signal lists have the same length as incoming"""
         blk = SetAttribute()
@@ -48,7 +48,7 @@ class TestSetAttribute(NIOBlockTestCase):
         for signal_list in self.notified_signals[DEFAULT_TERMINAL]:
             self.assertEqual(len(signal_list), 3)
 
-    @patch(SetAttribute.__module__ + '.Driver')
+    @patch(SetAttribute.__module__ + '.CIPDriver')
     def test_signal_enrichment(self, mock_driver):
         """Incoming signals are enriched new data"""
         drvr = mock_driver.return_value
@@ -63,7 +63,7 @@ class TestSetAttribute(NIOBlockTestCase):
             'path': [1, 1],
             'value': b'\x00\x00'}))
 
-    @patch(SetAttribute.__module__ + '.Driver')
+    @patch(SetAttribute.__module__ + '.CIPDriver')
     def test_failure_to_set(self, mock_driver):
         """One of two requests fail"""
         drvr = mock_driver.return_value
