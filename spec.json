@@ -16,7 +16,7 @@
       "class_id": {
         "title": "Class ID",
         "type": "IntType",
-        "description": "The CIP class ID, in decimal.",
+        "description": "The CIP class ID to request.",
         "default": 1
       },
       "instance_num": {
@@ -71,7 +71,7 @@
       "class_id": {
         "title": "Class ID",
         "type": "IntType",
-        "description": "The CIP class ID, in decimal.",
+        "description": "The CIP class ID to request.",
         "default": 1
       },
       "instance_num": {
