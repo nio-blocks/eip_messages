@@ -2,7 +2,7 @@ from unittest.mock import patch
 from nio import Signal
 from nio.block.terminals import DEFAULT_TERMINAL
 from nio.testing.block_test_case import NIOBlockTestCase
-from ..eip_set_attribute_block import CIPSetAttribute
+from ..eip_set_attribute_block import EIPSetAttribute
 
 
 class TestEIPSetAttribute(NIOBlockTestCase):
