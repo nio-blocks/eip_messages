@@ -2,12 +2,12 @@ from unittest.mock import patch
 from nio import Signal
 from nio.block.terminals import DEFAULT_TERMINAL
 from nio.testing.block_test_case import NIOBlockTestCase
-from ..cip_get_attribute_block import CIPGetAttribute
+from ..eip_get_attribute_block import EIPGetAttribute
 
 
-class TestCIPGetAttribute(NIOBlockTestCase):
+class TestEIPGetAttribute(NIOBlockTestCase):
 
-    @patch(CIPGetAttribute.__module__ + '.CIPDriver')
+    @patch(EIPGetAttribute.__module__ + '.CIPDriver')
     def test_block_expressions(self, mock_driver):
         """Get an attribute from the specified path and host"""
         drvr = mock_driver.return_value
@@ -17,7 +17,7 @@ class TestCIPGetAttribute(NIOBlockTestCase):
             'class_id': '{{ $class_id }}',
             'instance_num': '{{ $instance_num }}',
             'attribute_num': '{{ $attribute_num }}'}
-        blk = CIPGetAttribute()
+        blk = EIPGetAttribute()
         self.configure_block(blk, config)
         blk.start()
         drvr.open.assert_called_once_with('dummyhost')
@@ -30,10 +30,10 @@ class TestCIPGetAttribute(NIOBlockTestCase):
         self.assert_last_signal_notified(Signal(
             {'host': 'dummyhost', 'path': [8, 6, 7], 'value': 5309}))
 
-    @patch(CIPGetAttribute.__module__ + '.CIPDriver')
+    @patch(EIPGetAttribute.__module__ + '.CIPDriver')
     def test_signal_lists(self, mock_driver):
         """Outgoing signal lists have the same length as incoming"""
-        blk = CIPGetAttribute()
+        blk = EIPGetAttribute()
         self.configure_block(blk, {})
         blk.start()
         blk.process_signals([Signal()] * 3)
@@ -41,12 +41,12 @@ class TestCIPGetAttribute(NIOBlockTestCase):
         self.assertEqual(len(self.notified_signals[DEFAULT_TERMINAL]), 1)
         self.assertEqual(len(self.notified_signals[DEFAULT_TERMINAL][0]), 3)
 
-    @patch(CIPGetAttribute.__module__ + '.CIPDriver')
+    @patch(EIPGetAttribute.__module__ + '.CIPDriver')
     def test_signal_enrichment(self, mock_driver):
         """Incoming signals are enriched new data"""
         drvr = mock_driver.return_value
         drvr.get_attribute_single.return_value = 42
-        blk = CIPGetAttribute()
+        blk = EIPGetAttribute()
         self.configure_block(blk, {'enrich': {'exclude_existing': False}})
         blk.start()
         blk.process_signals([Signal({'foo': 'bar'})])
@@ -54,13 +54,13 @@ class TestCIPGetAttribute(NIOBlockTestCase):
         self.assert_last_signal_notified(Signal(
             {'foo': 'bar', 'host': 'localhost', 'path': [1, 1], 'value': 42}))
 
-    @patch(CIPGetAttribute.__module__ + '.CIPDriver')
+    @patch(EIPGetAttribute.__module__ + '.CIPDriver')
     def test_failure_to_get(self, mock_driver):
         """One of two requests fail"""
         drvr = mock_driver.return_value
         drvr.get_attribute_single.side_effect = [False, True]
         drvr.get_status.return_value = (1, 'bad things')
-        blk = CIPGetAttribute()
+        blk = EIPGetAttribute()
         self.configure_block(blk, {})
         blk.start()
         blk.process_signals([Signal()] * 2)

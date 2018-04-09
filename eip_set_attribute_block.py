@@ -5,7 +5,7 @@ from nio.properties import Property, IntProperty, StringProperty, \
                            VersionProperty
 
 
-class CIPSetAttribute(EnrichSignals, Block):
+class EIPSetAttribute(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     host = StringProperty(title='Hostname', default='localhost')
