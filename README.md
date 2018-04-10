@@ -1,4 +1,4 @@
-GetAttribute
+EIPGetAttribute
 ============
 Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device or controller requesting the value of a specified CIP Object class, instance, and attribute. Each instance of the block can handle connections to one target device only.
 
@@ -30,7 +30,7 @@ None
 ***
 
 
-SetAttribute
+EIPSetAttribute
 ============
 Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device or controller setting the value of a specified CIP Object class, instance, and attribute. Each instance of the block can handle connections to one target device only.
 
