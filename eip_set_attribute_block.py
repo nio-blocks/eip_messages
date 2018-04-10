@@ -7,7 +7,7 @@ from nio.properties import Property, IntProperty, StringProperty, \
 
 class EIPSetAttribute(EnrichSignals, Block):
 
-    version = VersionProperty('0.1.0')
+    version = VersionProperty("0.1.1")
     host = StringProperty(title='Hostname', default='localhost')
     class_id = IntProperty(title='Class ID', default=1)
     instance_num = IntProperty(title='Instance', default=1)
