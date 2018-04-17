@@ -12,13 +12,7 @@ class CIPDriver(Base):
 
     def get_attribute_single(self, clss, inst, attr=None):
         self.clear()
-        inst_header = [0x24]
-        if inst > 255:
-            inst_header = [0x25, 0x00]
-            inst = struct.pack('<H', inst)
-        else:
-            inst = [inst]
-        path = [0x20, clss, *inst_header, *list(inst)]
+        path = self._get_path(clss, inst, attr)
         if attr != None:
             path.extend([0x30, attr])
         message_request = [
@@ -44,13 +38,7 @@ class CIPDriver(Base):
 
     def set_attribute_single(self, data, clss, inst, attr=None):
         self.clear()
-        inst_header = [0x24]
-        if inst > 255:
-            inst_header = [0x25, 0x00]
-            inst = struct.pack('<H', inst)
-        else:
-            inst = [inst]
-        path = [0x20, clss, *inst_header, *list(inst)]
+        path = self._get_path(clss, inst, attr)
         if attr != None:
             path.extend([0x30, attr])
         message_request = [
@@ -70,6 +58,18 @@ class CIPDriver(Base):
             return True
         else:
             return False
+
+    def _get_path(self, clss, inst, attr):
+        if 65535 > inst > 255:
+            inst_header = [0x25, 0x00]
+            inst = struct.pack('<H', inst)
+        elif inst > 65535:
+            inst_header = [0x26, 0x00]
+            inst = struct.pack('<I', inst)
+        else:
+            inst_header = [0x24]
+            inst = [inst]
+        return [0x20, clss, *inst_header, *list(inst)]
 
     def _check_reply(self):
         """ check the reply message for error
