@@ -13,8 +13,6 @@ class CIPDriver(Base):
     def get_attribute_single(self, clss, inst, attr=None):
         self.clear()
         path = self._get_path(clss, inst, attr)
-        if attr != None:
-            path.extend([0x30, attr])
         message_request = [
             bytes([0x0E]),  # get attribute single service
             bytes([len(path) // 2]),  # the Request Path Size length in words
@@ -39,8 +37,6 @@ class CIPDriver(Base):
     def set_attribute_single(self, data, clss, inst, attr=None):
         self.clear()
         path = self._get_path(clss, inst, attr)
-        if attr != None:
-            path.extend([0x30, attr])
         message_request = [
             bytes([0x10]),  # set attribute single service
             bytes([len(path) // 2]),  # the Request Path Size length in word
@@ -69,7 +65,10 @@ class CIPDriver(Base):
         else:
             inst_header = [0x24]
             inst = [inst]
-        return [0x20, clss, *inst_header, *list(inst)]
+        path = [0x20, clss, *inst_header, *list(inst)]
+        if attr != None:
+            path.extend([0x30, attr])
+        return path
 
     def _check_reply(self):
         """ check the reply message for error
