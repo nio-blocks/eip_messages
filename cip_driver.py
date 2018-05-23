@@ -12,12 +12,10 @@ class CIPDriver(Base):
 
     def get_attribute_single(self, clss, inst, attr=None):
         self.clear()
-        path = [0x20, clss, 0x24, inst]
-        if attr != None:
-            path.extend([0x30, attr])
+        path = self._get_path(clss, inst, attr)
         message_request = [
             bytes([0x0E]),  # get attribute single service
-            bytes([len(path) // 2]),  # the Request Path Size length in word
+            bytes([len(path) // 2]),  # the Request Path Size length in words
             bytes(path),  # the request path
         ]
         packet = build_common_packet_format(
@@ -25,7 +23,6 @@ class CIPDriver(Base):
             b''.join(message_request),
             ADDRESS_ITEM['UCMM'],)
         if not self.send_rr_data(packet):
-            self._status = (6, "send_rr_data failed")
             logger.warning(self._status)
             raise DataError("send_rr_data failed")
         if self._status[0] == SUCCESS:
@@ -39,9 +36,7 @@ class CIPDriver(Base):
 
     def set_attribute_single(self, data, clss, inst, attr=None):
         self.clear()
-        path = [0x20, clss, 0x24, inst]
-        if attr != None:
-            path.extend([0x30, attr])
+        path = self._get_path(clss, inst, attr)
         message_request = [
             bytes([0x10]),  # set attribute single service
             bytes([len(path) // 2]),  # the Request Path Size length in word
@@ -53,13 +48,27 @@ class CIPDriver(Base):
             b''.join(message_request),
             ADDRESS_ITEM['UCMM'],)
         if not self.send_rr_data(packet):
-            self._status = (6, "send_rr_data failed")
             logger.warning(self._status)
             raise DataError("send_rr_data failed")
         if self._status[0] == SUCCESS:
             return True
         else:
             return False
+
+    def _get_path(self, clss, inst, attr):
+        if 65535 > inst > 255:
+            inst_header = [0x25, 0x00]
+            inst = struct.pack('<H', inst)
+        elif inst > 65535:
+            inst_header = [0x26, 0x00]
+            inst = struct.pack('<I', inst)
+        else:
+            inst_header = [0x24]
+            inst = [inst]
+        path = [0x20, clss, *inst_header, *list(inst)]
+        if attr != None:
+            path.extend([0x30, attr])
+        return path
 
     def _check_reply(self):
         """ check the reply message for error
