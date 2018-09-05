@@ -65,7 +65,9 @@ class CIPDriver(Base):
         else:
             inst_header = [0x24]
             inst = [inst]
-        path = [0x20, clss, *inst_header, *list(inst)]
+        path = [0x20, clss]
+        path.extend(inst_header)
+        path.extend(list(inst))
         if attr != None:
             path.extend([0x30, attr])
         return path
