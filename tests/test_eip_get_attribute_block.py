@@ -33,8 +33,9 @@ class TestEIPGetAttribute(NIOBlockTestCase):
     @patch(EIPGetAttribute.__module__ + '.CIPDriver')
     def test_signal_lists(self, mock_driver):
         """Outgoing signal lists have the same length as incoming"""
+        config = {}
         blk = EIPGetAttribute()
-        self.configure_block(blk, {})
+        self.configure_block(blk, config)
         blk.start()
         blk.process_signals([Signal()] * 3)
         blk.stop()
@@ -46,8 +47,9 @@ class TestEIPGetAttribute(NIOBlockTestCase):
         """Incoming signals are enriched new data"""
         drvr = mock_driver.return_value
         drvr.get_attribute_single.return_value = 42
+        config = {'enrich': {'exclude_existing': False}}
         blk = EIPGetAttribute()
-        self.configure_block(blk, {'enrich': {'exclude_existing': False}})
+        self.configure_block(blk, config)
         blk.start()
         blk.process_signals([Signal({'foo': 'bar'})])
         blk.stop()
@@ -56,14 +58,39 @@ class TestEIPGetAttribute(NIOBlockTestCase):
 
     @patch(EIPGetAttribute.__module__ + '.CIPDriver')
     def test_failure_to_get(self, mock_driver):
-        """One of two requests fail"""
+        """One of two requests fail but the connection is alive."""
         drvr = mock_driver.return_value
-        drvr.get_attribute_single.side_effect = [False, True]
+        drvr.get_attribute_single.side_effect = [False, 255]
         drvr.get_status.return_value = (1, 'bad things')
+        config = {}
         blk = EIPGetAttribute()
-        self.configure_block(blk, {})
+        self.configure_block(blk, config)
         blk.start()
         blk.process_signals([Signal()] * 2)
+        blk.stop()
         self.assertEqual(drvr.get_attribute_single.call_count, 2)
+        self.assertEqual(drvr.get_status.call_count, 1)
+        self.assert_num_signals_notified(1)
+
+    @patch(EIPGetAttribute.__module__ + '.CIPDriver')
+    def test_reconnect(self, mock_driver):
+        """Reconnect before retrying when the connection has died."""
+        drvr = mock_driver.return_value
+        drvr.get_attribute_single.side_effect = [Exception, 255]
+        drvr.get_status.side_effect = Exception
+        blk = EIPGetAttribute()
+        config = {
+            'retry_options': {
+                'multiplier': 0, # don't wait while testing
+            },
+        }
+        self.configure_block(blk, config)
+        self.assertEqual(drvr.open.call_count, 1)
+        blk.start()
+        blk.process_signals([Signal()])
+        self.assertEqual(drvr.get_attribute_single.call_count, 2)
+        self.assertEqual(drvr.close.call_count, 1)
+        self.assertEqual(drvr.open.call_count, 2)
         blk.stop()
         self.assert_num_signals_notified(1)
+        self.assertEqual(drvr.close.call_count, 2)

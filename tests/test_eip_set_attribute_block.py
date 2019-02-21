@@ -65,14 +65,40 @@ class TestEIPSetAttribute(NIOBlockTestCase):
 
     @patch(EIPSetAttribute.__module__ + '.CIPDriver')
     def test_failure_to_set(self, mock_driver):
-        """One of two requests fail"""
+        """One of two requests fail but the connection is alive."""
         drvr = mock_driver.return_value
-        drvr.set_attribute_single.side_effect = [False, True]
+        drvr.set_attribute_single.side_effect = [False, 255]
         drvr.get_status.return_value = (1, 'bad things')
+        config = {}
         blk = EIPSetAttribute()
-        self.configure_block(blk, {})
+        self.configure_block(blk, config)
         blk.start()
         blk.process_signals([Signal()] * 2)
+        blk.stop()
         self.assertEqual(drvr.set_attribute_single.call_count, 2)
+        self.assertEqual(drvr.get_status.call_count, 1)
+        self.assert_num_signals_notified(1)
+
+    @patch(EIPSetAttribute.__module__ + '.CIPDriver')
+    def test_reconnect(self, mock_driver):
+        """Reconnect before retrying when the connection has died."""
+        drvr = mock_driver.return_value
+        drvr.set_attribute_single.side_effect = [Exception, 255]
+        drvr.get_status.side_effect = Exception
+        blk = EIPSetAttribute()
+        config = {
+            'retry_options': {
+                'multiplier': 0, # don't wait while testing
+            },
+        }
+        self.configure_block(blk, config)
+        self.assertEqual(drvr.open.call_count, 1)
+        blk.start()
+        blk.process_signals([Signal()])
+        self.assertEqual(drvr.set_attribute_single.call_count, 2)
+        self.assertEqual(drvr.close.call_count, 1)
+        self.assertEqual(drvr.open.call_count, 2)
         blk.stop()
         self.assert_num_signals_notified(1)
+        self.assertEqual(drvr.close.call_count, 2)
+
