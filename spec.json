@@ -1,116 +1,22 @@
 {
   "nio/EIPGetAttribute": {
-    "version": "0.1.2",
-    "description": "Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device or controller requesting the value of a specified CIP Object class, instance, and attribute. Each instance of the block can handle connections to one target device only.",
+    "description": "Get attribute values from an EtherNet/IP device.",
     "categories": [
       "Hardware",
       "Communication"
     ],
-    "properties": {
-      "host": {
-        "title": "Hostname",
-        "type": "StringType",
-        "description": "The IP address or hostname of the target device.",
-        "default": "localhost"
-      },
-      "class_id": {
-        "title": "Class ID",
-        "type": "IntType",
-        "description": "The CIP class ID to request.",
-        "default": 1
-      },
-      "instance_num": {
-        "title": "Instance",
-        "type": "IntType",
-        "description": "The instance number of the CIP class.",
-        "default": 1
-      },
-      "attribute_num": {
-        "title": "Attribute",
-        "type": "Type",
-        "description": "(optional) The attribute number to request.",
-        "default": null
-      },
-      "enrich": {
-        "title": "Signal Enrichment",
-        "type": "ObjectType",
-        "description": "Signal Enrichment\n  - *exclude_existing*: If checked (true), the attributes of the incoming signal will be excluded from the outgoing signal. If unchecked (false), the attributes of the incoming signal will be included in the outgoing signal.\n  - *enrich_field*: (hidden) The attribute on the signal to store the results from this block. If this is empty, the results will be merged onto the incoming signal. This is the default operation. Having this field allows a block to 'save' the results of an operation to a single field on an incoming signal and notify the enriched signal.",
-        "default": {
-          "enrich_field": "",
-          "exclude_existing": true
-        }
-      }
-    },
-    "inputs": {
-      "default": {
-        "description": "Any list of signals."
-      }
-    },
-    "outputs": {
-      "default": {
-        "description": "A list of signals of equal length to input signals.\n  - *host* (string) the address of the target device.\n  - *path* (array) The requested path, such as [`class_id`, `instance_num`, `attribute_num`].\n  - *value* (bytes) The raw bytes returned from the request."
-      }
-    },
-    "commands": {}
+    "tags": "ethernet allen bradley logix",
+    "from_readme": "docs/eip_get_attribute_block.md",
+    "from_python": "eip_get_attribute_block.EIPGetAttribute"
   },
   "nio/EIPSetAttribute": {
-    "version": "0.1.2",
-    "description": "Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device or controller setting the value of a specified CIP Object class, instance, and attribute. Each instance of the block can handle connections to one target device only.",
+    "description": "Set attribute values in an EtherNet/IP device.",
     "categories": [
       "Hardware",
       "Communication"
     ],
-    "properties": {
-      "host": {
-        "title": "Hostname",
-        "type": "StringType",
-        "description": "The IP address or hostname of the target device.",
-        "default": "localhost"
-      },
-      "class_id": {
-        "title": "Class ID",
-        "type": "IntType",
-        "description": "The CIP class ID to request.",
-        "default": 1
-      },
-      "instance_num": {
-        "title": "Instance",
-        "type": "IntType",
-        "description": "The instance number of the CIP class.",
-        "default": 1
-      },
-      "attribute_num": {
-        "title": "Attribute",
-        "type": "Type",
-        "description": "(optional) The attribute number to set.",
-        "default": null
-      },
-      "value": {
-        "title": "Value(s) to Write",
-        "type": "Type",
-        "description": "Raw bytes to set as the attribute value.",
-        "default": "{{ bytes([0, 0]) }}"
-      },
-      "enrich": {
-        "title": "Signal Enrichment",
-        "type": "ObjectType",
-        "description": "Signal Enrichment\n  - *exclude_existing*: If checked (true), the attributes of the incoming signal will be excluded from the outgoing signal. If unchecked (false), the attributes of the incoming signal will be included in the outgoing signal.\n  - *enrich_field*: (hidden) The attribute on the signal to store the results from this block. If this is empty, the results will be merged onto the incoming signal. This is the default operation. Having this field allows a block to 'save' the results of an operation to a single field on an incoming signal and notify the enriched signal.",
-        "default": {
-          "enrich_field": "",
-          "exclude_existing": true
-        }
-      }
-    },
-    "inputs": {
-      "default": {
-        "description": "Any list of signals."
-      }
-    },
-    "outputs": {
-      "default": {
-        "description": "A list of signals of equal length to input signals.\n  - *host* (string) the address of the target device.\n  - *path* (array) The requested path, such as [`class_id`, `instance_num`, `attribute_num`].\n  - *value* (bytes) The raw bytes sent in the request."
-      }
-    },
-    "commands": {}
+    "tags": "ethernet allen bradley logix",
+    "from_readme": "docs/eip_set_attribute_block.md",
+    "from_python": "eip_set_attribute_block.EIPSetAttribute"
   }
 }

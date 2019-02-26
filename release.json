@@ -1,12 +1,13 @@
 {
   "nio/EIPGetAttribute": {
     "language": "Python",
-    "url": "git://github.com/nio-blocks/eip_messages.git",
-    "version": "0.1.2"
+    "from_python": "eip_get_attribute_block.EIPGetAttribute",
+    "url": "git://github.com/nio-blocks/eip_messages.git"
   },
   "nio/EIPSetAttribute": {
     "language": "Python",
-    "url": "git://github.com/nio-blocks/eip_messages.git",
-    "version": "0.1.2"
+    "from_python": "eip_set_attribute_block.EIPSetAttribute",
+    "url": "git://github.com/nio-blocks/eip_messages.git"
+
   }
 }
