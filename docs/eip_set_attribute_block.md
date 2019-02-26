@@ -5,9 +5,10 @@ Send a class 3 (unconnected) explicit message to an EtherNet/IP scanner device o
 Properties
 ----------
 - **Hostname**: The IP address or hostname of the target device.
-- **Class ID**: The CIP class ID to request.
-- **Instance**: The instance number of the CIP class.
-- **Attribute**: (optional) The attribute number to set.
+- **CIP Object Path**
+  - *Class ID*: The CIP class ID to request.
+  - *Instance*: The instance number of the CIP class.
+  - *Attribute*: (optional) The attribute number to set.
 - **Value(s) to Write**: Raw bytes to set as the attribute value.
 
 Example

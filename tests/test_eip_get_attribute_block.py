@@ -19,9 +19,11 @@ class TestEIPGetAttribute(NIOBlockTestCase):
         drvr.get_attribute_single.return_value = 5309
         config = {
             'host': 'dummyhost',
-            'class_id': '{{ $class_id }}',
-            'instance_num': '{{ $instance_num }}',
-            'attribute_num': '{{ $attribute_num }}',
+            'path': {
+                'class_id': '{{ $class_id }}',
+                'instance_num': '{{ $instance_num }}',
+                'attribute_num': '{{ $attribute_num }}',
+            },
         }
         blk = EIPGetAttribute()
         self.configure_block(blk, config)

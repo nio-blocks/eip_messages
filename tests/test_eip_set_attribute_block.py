@@ -18,9 +18,11 @@ class TestEIPSetAttribute(NIOBlockTestCase):
         drvr = mock_driver.return_value
         config = {
             'host': 'dummyhost',
-            'class_id': '{{ $class_id }}',
-            'instance_num': '{{ $instance_num }}',
-            'attribute_num': '{{ $attribute_num }}',
+            'path': {
+                'class_id': '{{ $class_id }}',
+                'instance_num': '{{ $instance_num }}',
+                'attribute_num': '{{ $attribute_num }}',
+            },
             'value': '{{ $value }}'}
         blk = EIPSetAttribute()
         self.configure_block(blk, config)
@@ -44,8 +46,9 @@ class TestEIPSetAttribute(NIOBlockTestCase):
     @patch(EIPSetAttribute.__module__ + '.CIPDriver')
     def test_signal_lists(self, mock_driver):
         """Outgoing signal lists have the same length as incoming"""
+        config = {}
         blk = EIPSetAttribute()
-        self.configure_block(blk, {})
+        self.configure_block(blk, config)
         blk.start()
         blk.process_signals([Signal()] * 3)
         blk.stop()
@@ -57,8 +60,9 @@ class TestEIPSetAttribute(NIOBlockTestCase):
     def test_signal_enrichment(self, mock_driver):
         """Incoming signals are enriched new data"""
         drvr = mock_driver.return_value
+        config = {'enrich': {'exclude_existing': False}}
         blk = EIPSetAttribute()
-        self.configure_block(blk, {'enrich': {'exclude_existing': False}})
+        self.configure_block(blk, config)
         blk.start()
         blk.process_signals([Signal({'foo': 'bar'})])
         blk.stop()

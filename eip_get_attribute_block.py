@@ -1,17 +1,23 @@
 from .cip_driver import CIPDriver
 from nio import Block
 from nio.block.mixins import EnrichSignals, Retry
-from nio.properties import Property, IntProperty, StringProperty, \
-                           VersionProperty
+from nio.properties import IntProperty, ObjectProperty, Property, \
+    PropertyHolder, StringProperty, VersionProperty
+
+
+class ObjectPath(PropertyHolder):
+
+    class_id = IntProperty(title='Class ID', default=1, order=0)
+    instance_num = IntProperty(title='Instance', default=1, order=1)
+    attribute_num = Property(
+        title='Attribute', default=None, allow_none=True, order=2)
 
 
 class EIPGetAttribute(EnrichSignals, Retry, Block):
 
+    host = StringProperty(title='Hostname', default='localhost', order=0)
+    path = ObjectProperty(ObjectPath, title='CIP Object Path',  order=1)
     version = VersionProperty('0.2.0')
-    host = StringProperty(title='Hostname', default='localhost')
-    class_id = IntProperty(title='Class ID', default=1)
-    instance_num = IntProperty(title='Instance', default=1)
-    attribute_num = Property(title='Attribute', default=None, allow_none=True)
 
     def __init__(self):
         super().__init__()
@@ -44,9 +50,10 @@ class EIPGetAttribute(EnrichSignals, Retry, Block):
                 self.logger.error(msg)
                 raise exc
         for signal in signals:
-            path = [self.class_id(signal), self.instance_num(signal)]
-            if self.attribute_num(signal) is not None:
-                path.append(int(self.attribute_num(signal)))
+            path = [
+                self.path().class_id(signal), self.path().instance_num(signal)]
+            if self.path().attribute_num(signal) is not None:
+                path.append(int(self.path().attribute_num(signal)))
             try:
                 value = self.execute_with_retry(self._make_request, path)
             except Exception as exc:
