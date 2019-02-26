@@ -24,17 +24,40 @@ class EIPSetAttribute(EnrichSignals, Retry, Block):
 
     def configure(self, context):
         super().configure(context)
-        self._connect()
+        try:
+            self._connect()
+        except Exception:
+            self.cnxn = None
+            msg = 'Unable to connect to {}'.format(self.host())
+            self.logger.exception(msg)
 
     def process_signals(self, signals):
-        outgoing_signals = []
         host = self.host()
+        outgoing_signals = []
+        if self.cnxn is None:
+            try:
+                msg = 'Connecting to {}'.format(host)
+                self.logger.warning(msg)
+                self._connect()
+            except Exception as exc:
+                self.cnxn = None
+                msg = 'Unable to connect to {}'.format(host)
+                self.logger.error(msg)
+                raise exc
         for signal in signals:
             path = [self.class_id(signal), self.instance_num(signal)]
             if self.attribute_num(signal) != None:
                 path.append(int(self.attribute_num(signal)))
             write_value = self.value(signal)
-            value = self.execute_with_retry(self._make_request, write_value, path)
+            try:
+                value = self.execute_with_retry(
+                    self._make_request, write_value, path)
+            except Exception as exc:
+                value = False
+                self.cnxn = None
+                msg = 'set_attribute_single failed, host: {}, path: {}'
+                self.logger.error(msg.format(host, path))
+                raise exc
             if value:
                 new_signal_dict = {}
                 new_signal_dict['host'] = host
@@ -66,8 +89,9 @@ class EIPSetAttribute(EnrichSignals, Retry, Block):
         self.cnxn.open(self.host())
 
     def _disconnect(self):
-        self.cnxn.close()
-        self.cnxn = None
+        if self.cnxn is not None:
+            self.cnxn.close()
+            self.cnxn = None
 
     def _make_request(self, value, path):
         return self.cnxn.set_attribute_single(value, *path)
