@@ -23,16 +23,38 @@ class EIPGetAttribute(EnrichSignals, Retry, Block):
 
     def configure(self, context):
         super().configure(context)
-        self._connect()
+        try:
+            self._connect()
+        except Exception:
+            self.cnxn = None
+            msg = 'Unable to connect to {}'.format(self.host())
+            self.logger.exception(msg)
 
     def process_signals(self, signals):
-        outgoing_signals = []
         host = self.host()
+        outgoing_signals = []
+        if self.cnxn is None:
+            try:
+                msg = 'Connecting to {}'.format(host)
+                self.logger.warning(msg)
+                self._connect()
+            except Exception as exc:
+                self.cnxn = None
+                msg = 'Unable to connect to {}'.format(host)
+                self.logger.error(msg)
+                raise exc
         for signal in signals:
             path = [self.class_id(signal), self.instance_num(signal)]
             if self.attribute_num(signal) is not None:
                 path.append(int(self.attribute_num(signal)))
-            value = self.execute_with_retry(self._make_request, path)
+            try:
+                value = self.execute_with_retry(self._make_request, path)
+            except Exception as exc:
+                value = False
+                self.cnxn = None
+                msg = 'get_attribute_single failed, host: {}, path: {}'
+                self.logger.error(msg.format(host, path))
+                raise exc
             if value:
                 new_signal_dict = {}
                 new_signal_dict['host'] = host
@@ -45,7 +67,7 @@ class EIPGetAttribute(EnrichSignals, Retry, Block):
                     msg = 'Connection to {} failed.'.format(host)
                 else:
                     status = self.cnxn.get_status()
-                    msg = 'get_attribute_single failed: {}\nhost: {}, path: {}'
+                    msg = 'get_attribute_single failed, {}, host: {}, path: {}'
                     msg = msg.format(status, host, path)
                 self.logger.error(msg)
         self.notify_signals(outgoing_signals)
@@ -62,8 +84,9 @@ class EIPGetAttribute(EnrichSignals, Retry, Block):
         self.cnxn.open(self.host())
 
     def _disconnect(self):
-        self.cnxn.close()
-        self.cnxn = None
+        if self.cnxn is not None:
+            self.cnxn.close()
+            self.cnxn = None
 
     def _make_request(self, path):
         return self.cnxn.get_attribute_single(*path)
