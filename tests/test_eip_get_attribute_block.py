@@ -97,8 +97,7 @@ class TestEIPGetAttribute(NIOBlockTestCase):
         self.assertIsNone(blk.cnxn)
         # start processing signals and try (and fail) to reopen connection
         blk.start()
-        with self.assertRaises(CustomException):
-            blk.process_signals([Signal()])
+        blk.process_signals([Signal()])
         self.assertEqual(drvr.open.call_count, 2)
         # still no connection
         drvr.get_attribute_single.assert_not_called()
@@ -144,8 +143,7 @@ class TestEIPGetAttribute(NIOBlockTestCase):
         self.configure_block(blk, config)
         blk.start()
         self.assertEqual(blk.cnxn, drvr)
-        with self.assertRaises(CustomException):
-            blk.process_signals([Signal()])
+        blk.process_signals([Signal()])
         self.assertIsNone(blk.cnxn)
         self.assertEqual(drvr.get_status.call_count, 0)
         blk.stop()
