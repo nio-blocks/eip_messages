@@ -19,7 +19,7 @@ class EIPSetAttribute(EnrichSignals, Retry, Block):
     path = ObjectProperty(ObjectPath, title='CIP Object Path',  order=1)
     value = Property(
         title='Value(s) to Write', default='{{ bytes([0, 0]) }}', order=2)
-    version = VersionProperty('0.2.0')
+    version = VersionProperty('0.2.1')
 
     def __init__(self):
         super().__init__()
@@ -43,14 +43,14 @@ class EIPSetAttribute(EnrichSignals, Retry, Block):
         outgoing_signals = []
         if self.cnxn is None:
             try:
-                msg = 'Connecting to {}'.format(host)
+                msg = 'Not connected to {}, reconnecting...'.format(host)
                 self.logger.warning(msg)
                 self._connect()
-            except Exception as exc:
+            except Exception:
                 self.cnxn = None
                 msg = 'Unable to connect to {}'.format(host)
-                self.logger.error(msg)
-                raise exc
+                self.logger.exception(msg)
+                return
         for signal in signals:
             path = [
                 self.path().class_id(signal), self.path().instance_num(signal)]
@@ -60,12 +60,11 @@ class EIPSetAttribute(EnrichSignals, Retry, Block):
             try:
                 value = self.execute_with_retry(
                     self._make_request, write_value, path)
-            except Exception as exc:
+            except Exception:
                 value = False
                 self.cnxn = None
                 msg = 'set_attribute_single failed, host: {}, path: {}'
-                self.logger.error(msg.format(host, path))
-                raise exc
+                self.logger.exception(msg.format(host, path))
             if value:
                 new_signal_dict = {}
                 new_signal_dict['host'] = host
